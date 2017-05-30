@@ -54,15 +54,27 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   */
    //hx =  arctan(x) = atan(x_); 
    //test - try replacing z with x_
-  float px = z(0);
+  /*float px = z(0);
   float py = z(1);
   float vx = z(2);
-  float vy = z(3);
+  float vy = z(3);*/
+
+	float px = x_(0);
+	float py = x_(1);
+	float vx = x_(2);
+	float vy = x_(3);
+
   // converting predicted data to polar co-ordinates
   float c1 = px*px+py*py;
-  float rho = sqrt(c1);
-  float phi = atan(py/px);
-  float rho_dot = (px*vx+py+vy)/rho;  
+  float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1)); //sqrt(c1); (This is not working)
+  float phi = atan2(x_(1), x_(0)); // atan2(py, px); this is also is not working
+  float rho_dot;
+
+  if (fabs(rho) < 0.0001) {
+    rho_dot = 0;
+  } else {
+	  rho_dot = (x_(0)*x_(2) + x_(1)*x_(3)) / rho; ; // (px*vx + py + vy) / rho;
+  }
   
   VectorXd hx;
   hx << rho, phi, rho_dot;
