@@ -1,0 +1,46 @@
+configuring dev environment
+1. Had to install - https://github.com/Microsoft/vcpkg (https://www.youtube.com/watch?v=y41WFKbQFTw)
+2. 
+
+
+
+
+state (x) = (p,v)
+
+1. State transition function that models how state is transitioned from time(k-1) to time(k)
+2. Measurement function (z) that models how measurement is calculated and how it related to predicted state x
+3. Covariance (P)
+4. Update step is also called correction step
+5. K matrix = kalman filter gain
+6. P` = uncertainty about our position
+7. R = uncertainty in sensor measurement (represents the uncertainty in the position measurements we receive from the laser sensor)
+8. p is location\position
+9. x contains our belief
+
+x`=F=x+noise
+noise = 0 (lesson 6)
+F = (1,delta t,
+     0,1    )
+
+p`=p+v*delta t
+
+//Kalman Filter variables
+VectorXd x;	// object state
+MatrixXd P;	// object covariance matrix
+VectorXd u;	// external motion
+MatrixXd F; // state transition matrix
+MatrixXd H;	// measurement matrix
+MatrixXd R;	// measurement covariance matrix
+MatrixXd I; // Identity matrix
+MatrixXd Q;	// process covariance matrix
+
+"For the update step, we use the measurement function (z) to map the state vector into the measurement space of the sensor.To give a concrete example, lidar only measures an object's 
+position. But the extended Kalman filter models an object's position and velocity. So multiplying by the measurement function H matrix will drop the velocity information from the 
+state vector x. Then the lidar measurement position and our belief about the object's position can be compared. "
+
+z = H*x + w
+w (omega [measurement noise])
+
+y=z−Hx'
+​
+
