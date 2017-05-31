@@ -36,9 +36,9 @@ void KalmanFilter::Update(const VectorXd &z) {
   VectorXd z_pred = H_ * x_;
 	VectorXd y = z - z_pred; // so it is the difference between predicted and measured 
 	MatrixXd Ht = H_.transpose();
-	MatrixXd S = H_ * P_ * Ht + R_;
-	MatrixXd Si = S.inverse();
 	MatrixXd PHt = P_ * Ht;
+	MatrixXd S = H_ * PHt + R_;
+	MatrixXd Si = S.inverse();	
 	MatrixXd K = PHt * Si;
 
 	//new estimate
@@ -49,40 +49,58 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**  
-    * update the state by using Extended Kalman Filter equations
-  */
-   //hx =  arctan(x) = atan(x_); 
-   //test - try replacing z with x_
-  /*float px = z(0);
-  float py = z(1);
-  float vx = z(2);
-  float vy = z(3);*/
+	/**  
+	* update the state by using Extended Kalman Filter equations
+	*/
+	//hx =  arctan(x) = atan(x_); 
+	//test - try replacing z with x_
+	/*float px = z(0);
+	float py = z(1);
+	float vx = z(2);
+	float vy = z(3);*/
 
 	float px = x_(0);
 	float py = x_(1);
 	float vx = x_(2);
 	float vy = x_(3);
 
-  // converting predicted data to polar co-ordinates
-  float c1 = px*px+py*py;
-  float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1)); //sqrt(c1); (This is not working)
-  float phi = atan2(x_(1), x_(0)); // atan2(py, px); this is also is not working
-  float rho_dot;
+	// converting predicted data to polar co-ordinates
+	float c1 = px*px+py*py;
+	float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1)); //sqrt(c1); (This is not working)
+	float phi = atan2(x_(1), x_(0)); // atan2(py, px); this is also is not working
+	float rho_dot;
 
-  if (fabs(rho) < 0.0001) {
-    rho_dot = 0;
-  } else {
-	  rho_dot = (x_(0)*x_(2) + x_(1)*x_(3)) / rho; ; // (px*vx + py + vy) / rho;
-  }
+	if (fabs(rho) < 0.0001) 
+	{
+		rho_dot = 0;
+	} 
+	else 
+	{
+		rho_dot = (x_(0)*x_(2) + x_(1)*x_(3)) / rho; ; // (px*vx + py + vy) / rho;
+	}
   
-  VectorXd hx(3);
-  hx << rho, phi, rho_dot;
-  VectorXd y = z - hx;
-  MatrixXd Ht = H_.transpose();
-	MatrixXd S = H_ * P_ * Ht + R_;
-	MatrixXd Si = S.inverse();
+	//VectorXd hx(3);
+	VectorXd hx = VectorXd(3);
+	hx << rho, phi, rho_dot;
+	VectorXd y(3);
+	y = z - hx;
+
+	while (!(y(1) < M_PI && y(1) > -M_PI))
+	{
+		if (y(1) < -M_PI)
+		{
+			y(1) += 2 * M_PI;
+		}
+		else if (y(1) > M_PI)
+		{
+			y(1) -= 2 * M_PI;
+		}
+	}
+
+	MatrixXd Ht = H_.transpose();
 	MatrixXd PHt = P_ * Ht;
+	MatrixXd S = H_ * PHt + R_;
+	MatrixXd Si = S.inverse();	
 	MatrixXd K = PHt * Si;
 
 	//new estimate
